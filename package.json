@@ -17,6 +17,7 @@
     "@react-navigation/native": "^6.1.7",
     "@react-navigation/native-stack": "^6.9.13",
     "@reduxjs/toolkit": "^1.9.5",
+    "@tanstack/react-query": "^4.36.1",
     "axios": "^1.5.0",
     "expo": "~49.0.8",
     "expo-app-loading": "^2.1.1",
@@ -32,6 +33,7 @@
     "react-native-geocoder": "^0.5.0",
     "react-native-gesture-handler": "~2.12.0",
     "react-native-google-places-autocomplete": "^2.5.1",
+    "react-native-loading-spinner-overlay": "^3.0.1",
     "react-native-maps": "1.7.1",
     "react-native-maps-directions": "^1.9.0",
     "react-native-modal": "^13.0.1",
@@ -41,9 +43,11 @@
     "react-native-screens": "~3.22.0",
     "react-native-svg": "13.9.0",
     "react-native-svg-transformer": "^1.1.0",
+    "react-native-toast-message": "^2.1.7",
     "react-native-web": "~0.19.6",
     "react-redux": "^8.1.2",
     "rn-tooltip": "^3.0.3",
+    "undefined": "@tanstack/react-query^v4",
     "yup": "^1.2.0"
   },
   "devDependencies": {

@@ -43,7 +43,7 @@ function HomeTabs() {
         name='Orders'
         component={Order}
         options={{
-          tabBarLabel: 'Orders',
+          tabBarLabel: 'Earnings',
           tabBarIcon: (focused, color, size) => {
             return (
               <View
@@ -54,7 +54,7 @@ function HomeTabs() {
               </View>
             )
           },
-          tabBarBadge: 3,
+          
           tabBarBadgeStyle: { color: 'blue',paddingHorizontal:4  },
         }}
       />

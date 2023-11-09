@@ -7,6 +7,8 @@ import {store} from './store'
 import Navigation from './Navigation';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AppLoading from 'expo-app-loading'
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import Toast from 'react-native-toast-message';
 import {
   useFonts,
   OpenSans_300Light,
@@ -44,12 +46,16 @@ export default function App() {
   if (!fontsLoaded) {
     return <AppLoading />
   }
+  const queryClient = new QueryClient()
   
   return (
     
     <Provider store={store}>
+    <QueryClientProvider client={queryClient}>
 
     <Navigation/>
+    </QueryClientProvider>
+    <Toast/>
    
     </Provider>
   )

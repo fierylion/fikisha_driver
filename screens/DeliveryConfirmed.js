@@ -23,10 +23,13 @@ const OrderPlaced = () => {
             Delivery Confirmed, Start Delivering
           </Text>
         </View>
-        <View className=' w-80 absolute bottom-10' >
-          <TouchableOpacity className='bg-custom_blue-500 p-2 rounded' onPress={()=>navigation.navigate('Home', {screen:'Home'})} >
+        <View className=' w-80 absolute bottom-10'>
+          <TouchableOpacity
+            className='bg-custom_blue-500 p-2 rounded'
+            onPress={() => navigation.navigate('ManageDeliveries')}
+          >
             <Text className='text-custom_white-100 text-center'>
-              Back to Home
+              Start Delivering
             </Text>
           </TouchableOpacity>
         </View>

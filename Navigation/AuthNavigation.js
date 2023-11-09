@@ -61,7 +61,7 @@ export default function AuthNavigation() {
         <Stack.Screen name='Terms' component={Terms} />
         <Stack.Screen name='Language' component={Language} />
         <Stack.Screen name='Profile' component={Profile} />
-        <Stack.Screen name='LocationID' component={LocationID} />
+        <Stack.Screen name='Earnings' component={LocationID} />
         <Stack.Screen name='Help' component={Help} />
         <Stack.Screen name='BeDriver' component={BeDriver} />
         <Stack.Screen name='RefundPolicy' component={RefundPolicy} />

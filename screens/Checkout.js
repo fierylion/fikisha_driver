@@ -57,7 +57,7 @@ const Checkout = () => {
           return
         }
         let location = await Location.getCurrentPositionAsync({});
-        console.log(location)
+
         dispatch(modifyData({data:{...loc,latitude:location.coords.latitude, longitude:location.coords.longitude}, type:'SENDER_LOCATION'}))
       
 

@@ -3,37 +3,38 @@ import React, { useRef, useState } from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useNavigation } from '@react-navigation/native'
 import * as Icon from 'react-native-feather'
+import { useSelector } from 'react-redux'
 
 const EditProfile = () => {
   const navigation = useNavigation()
-
-  const [firstName, setFirstName] = React.useState('Daniel')
+  const user_data = useSelector(state =>state.auth.user_data)
+  const [firstName, setFirstName] = React.useState(user_data?.agent?.name)
   const [lastName, setLastName] = React.useState('Mawalla')
 
   const [email, setEmail] = React.useState('mawalladaniel2021@gmail.com')
-  const [phone, setPhone] = React.useState('+255628630936')
+  const [phone, setPhone] = React.useState(user_data?.agent?.phone)
   const fields = [
     {
-      title: 'First Name',
+      title: 'Full Name',
       value: firstName,
       setValue: setFirstName,
       placeholder: 'Enter your first name',
       SvgIcon: Icon.User,
     },
-    {
-      title: 'Last Name',
-      value: lastName,
-      setValue: setLastName,
-      placeholder: 'Enter your last name',
-      SvgIcon: Icon.User,
-    },
-    {
-      title: 'Email',
-      value: email,
-      setValue: setEmail,
-      placeholder: 'Enter your email',
-      SvgIcon: Icon.Mail,
-    },
+    // {
+    //   title: 'Last Name',
+    //   value: lastName,
+    //   setValue: setLastName,
+    //   placeholder: 'Enter your last name',
+    //   SvgIcon: Icon.User,
+    // },
+    // {
+    //   title: 'Email',
+    //   value: email,
+    //   setValue: setEmail,
+    //   placeholder: 'Enter your email',
+    //   SvgIcon: Icon.Mail,
+    // },
     {
       title: 'Phone',
       value: phone,

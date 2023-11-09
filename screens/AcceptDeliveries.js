@@ -1,4 +1,4 @@
-import { View, Text, StatusBar, TouchableOpacity,ScrollView, ActivityIndicator, BackHandler } from 'react-native'
+import { View, Text, StatusBar, TouchableOpacity,ScrollView, ActivityIndicator, BackHandler, Pressable } from 'react-native'
 import React from 'react'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import * as Icon from 'react-native-feather'
@@ -12,6 +12,7 @@ import DistanceSvg from '../assets/images/acceptDeliveries/distance.svg'
 import { formatDate, formatMoneyWithCommas } from '../formatters'
 import { useState } from 'react'
 import { useEffect } from 'react'
+import Toast from 'react-native-toast-message'
 
 
 const AcceptDeliveries = () => {
@@ -40,8 +41,10 @@ const AcceptDeliveries = () => {
  const clickType = [{}, {}]
  const instantOrders = useSelector(state=>state.order.orders.instant)
   const sharingOrders = useSelector(state=>state.order.orders.sharing)
+//pending order 
+const pendingOrder = useSelector(state=>state.delivery.deliveries.pending)
 
- console.log(instantOrders, 'accept')
+ 
 
 
  return (
@@ -51,6 +54,20 @@ const AcceptDeliveries = () => {
    >
      {/* <Text className='text-3xl text-red-600'>Introducti</Text> */}
      <StatusBar barStyle='dark-content' backgroundColor='#808080' />
+     {pendingOrder && (
+       <Pressable onPress={() => navigation.navigate('ManageDeliveries')}>
+         <View className=' flex flex-row bg-custom_blue-200 rounded-b-2xl px-3 '>
+          
+           <View className='pl-2  font-semibold  text-custom_white-100  w-full'>
+             <Text className='font-semibold  text-lg text-custom_white-100 mt-3 text-center my-auto'>
+               Deliver Order #{pendingOrder.order_id.substring(0, 7)}
+             </Text>
+           
+             <Text className='font-medium text-lg'></Text>
+           </View>
+         </View>
+       </Pressable>
+     )}
      <View className='mt-1 flex flex-row items-center mx-3'>
        <Icon.ArrowLeft
          color={'gray'}
@@ -105,15 +122,23 @@ const AcceptDeliveries = () => {
          </Text>
        </TouchableOpacity>
      </View>
+
      <ScrollView className='mx-3 '>
        <View className='mt-3'>
          {typeClicked === 'instant'
            ? instantOrders.map((order, index) => {
-               console.log(order)
-               return <SingleInstantOrder key={index} order={order} />
+               return (
+                 <SingleInstantOrder
+                   key={index}
+                   order={order}
+                   pendingOrder={pendingOrder}
+                 />
+               )
              })
            : sharingOrders.map((order, index) => {
-               return <SingleSharingOrder key={index} />
+               return (
+                 <SingleSharingOrder key={index} pendingOrder={pendingOrder} />
+               )
              })}
        </View>
      </ScrollView>
@@ -121,9 +146,10 @@ const AcceptDeliveries = () => {
  )
 }
 
-const SingleInstantOrder = ({order})=>{
+const SingleInstantOrder = ({order, pendingOrder})=>{
   //  {"category": "Sortables", "fee": 1000, "payment_by": "sender", "payment_means": "instant", "payment_method": "cash", "receiver_id": {"location_id": {"extra": null, "geocode": "Kinondoni ,66W3+Q3M, Dar es Salaam, Tanzania", "latitude": -6.75275763211196, "latitudeDelta": 0.006005423636554319, "longitude": 39.2026343755424, "longitudeDelta": 0.002999715507030487}, "name": "Gui", "phone": "26568"}, "sender_id": {"location_id": {"extra": null, "geocode": "Kinondoni ,66X2+8G Dar es Salaam, Tanzania", "latitude": -6.7516722, "latitudeDelta": 0.003, "longitude": 39.201334, "longitudeDelta": 0.003}, "name": "Dan", "phone": "56767"}, "status": "pending", "user_id": "ae14ad5c-2712-4106-9e8d-6460102ef000"}
   const [time, setTime] = useState('0 mins ago')
+
   const navigation = useNavigation()
   useEffect(
     ()=>{
@@ -135,7 +161,20 @@ const SingleInstantOrder = ({order})=>{
 
     }, []
   )
- 
+  const handleAccept = ()=>{
+    if(pendingOrder){
+      Toast.show(
+        {
+          type:'info',
+          text1:'Complete Delivery',
+          text2:'Please the placed delivery'
+        }
+      )
+      return 
+
+    }
+    navigation.navigate('InstantDetails', { order })
+  }
   
 
   return (
@@ -149,7 +188,7 @@ const SingleInstantOrder = ({order})=>{
         </View>
         <TouchableOpacity
           className='p-1 border border-custom_orange-500 rounded px-2'
-          onPress={() => navigation.navigate('InstantDetails', { order })}
+          onPress={handleAccept}
         >
           <Text>Accept</Text>
         </TouchableOpacity>

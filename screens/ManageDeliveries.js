@@ -1,4 +1,4 @@
-import { View, Text, BackHandler, StatusBar, Image, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native'
+import { View, Text, BackHandler, StatusBar, Image, TouchableOpacity, TextInput, ActivityIndicator, Pressable } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import MapView, { Marker, AnimatedRegion, Callout, Polyline } from 'react-native-maps'
 import React, { useEffect, useState, useRef } from 'react'
@@ -19,6 +19,8 @@ import {
 } from '@gorhom/bottom-sheet'
 import useFetch from '../hooks/useFetch'
 import { removeDelivery } from '../store/deliverySlice'
+import BackButton from '../components/BackButton'
+import { callNumber } from '../libs/utils'
 const ManageDeliveries = () => {
   const bottomSheetModalRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
@@ -35,6 +37,7 @@ const ManageDeliveries = () => {
   const [duration, setDuration] = useState('')
   const [distance, setDistance] = useState('')
  const data = useSelector((state) => state.delivery.deliveries.pending)
+ 
 
  const animateMarker = (newCoordinate)=>{
     if (markerRef.current) {
@@ -69,6 +72,7 @@ const ManageDeliveries = () => {
  
   useEffect(()=>{
    if(destinationLocation.latitude !== 0 && destinationLocation.longitude !== 0 && driverLocation.latitude !== 0 && driverLocation.longitude !== 0){
+    if(mapRef.current){
     mapRef.current.animateToRegion(
       {
         latitude: (destinationLocation.latitude + driverLocation.latitude) / 2, // Calculate the average latitude
@@ -78,6 +82,7 @@ const ManageDeliveries = () => {
       },
       1000
     )}
+   }
 
   }, [destinationLocation])
   
@@ -106,7 +111,7 @@ const ManageDeliveries = () => {
           animateMarker({latitude, longitude})
           setDriverLocation((state) => {
             if (state.latitude === 0 || state.longitude === 0) {
-              mapRef.current.animateToRegion(
+             mapRef.current &&  mapRef.current.animateToRegion(
                 {
                   latitude,
                   longitude,
@@ -171,8 +176,8 @@ const ManageDeliveries = () => {
 
   //  }, [typeRender]
   // )
-  
 
+ 
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: 'gray' }}>
@@ -182,7 +187,52 @@ const ManageDeliveries = () => {
           keyboardShouldPersistTaps={'handled'}
         >
           {/* <Text className='text-3xl text-red-600'>Introducti</Text> */}
-          <StatusBar barStyle='dark-content' backgroundColor='#808080' />
+          {/* <StatusBar barStyle='dark-content' backgroundColor='#808080' /> */}
+
+          {!data && (
+            <View className='relative w-full h-full'>
+              <BackButton />
+
+              <View className='flex-row mx-auto absolute  bottom-10 bg-custom_white-100 p-2 rounded-lg  left-3 z-10'>
+                <Pressable
+                  onPress={() => navigation.navigate('AcceptDeliveries')}
+                >
+                  <Text className='text-custom_blue-200 font-sanBold_700 my-auto ml-1 text-lg'>
+                    View Orders
+                  </Text>
+                </Pressable>
+              </View>
+
+              {/* <View className='absolute z-10 top-2  left-36 p-2 w-1/2 mx-auto bg-white rounded-lg'>
+                <Text className='text-custom_orange-500'>
+                  No Deliveries Found
+                </Text>
+              </View> */}
+              <MapView
+                ref={mapRef}
+                initialRegion={driverLocation}
+                followsUserLocation={true}
+                showsUserLocation={true}
+                showsMyLocationButton={true}
+                style={{ height: '100%', width: '100%' }}
+              >
+                <Marker.Animated
+                  coordinate={new AnimatedRegion(driverLocation)}
+                  ref={markerRef}
+                >
+                  <Image
+                    source={BikeImage}
+                    style={{
+                      width: 40,
+                      height: 40,
+                      transform: [{ rotate: `${driverLocation.heading}deg` }],
+                    }}
+                    resizeMode='contain'
+                  />
+                </Marker.Animated>
+              </MapView>
+            </View>
+          )}
           {data && (
             <View className='relative'>
               <MapView
@@ -235,6 +285,16 @@ const ManageDeliveries = () => {
                   }}
                 ></MapViewDirections>
               </MapView>
+              <View className=' pl-2 absolute top-0 w-80 rounded-b  h-14  flex flex-row justify-around items-center bg-custom_blue-200'>
+                
+                <View className='flex flex-row space-x-2'>
+                  
+                  <Text className=' text-custom_white-100 text-3xl font-sanBold_700'>
+                    {duration} min
+                  </Text>
+                </View>
+                <Text className='text-3xl font-sanBold_700 text-custom_white-100'>{distance} Km</Text>
+              </View>
               <View className='absolute bottom-0  w-full'>
                 {!viewDetails && (
                   <TouchableOpacity
@@ -314,9 +374,9 @@ const ManageDeliveries = () => {
                         <Text
                           className={` ${
                             data.paymentWith === 'cash'
-                              ? ' bg-custom_orange-500'
-                              : ' bg-custom_blue-200'
-                          } text-custom_white-100 p-2 shadow  my-auto text-center rounded-lg `}
+                              ? ' text-custom_orange-500'
+                              : ' text-custom_blue-200'
+                          }  p-2 shadow  my-auto text-center rounded-lg `}
                         >
                           {data.paymentWith === 'cash' ? 'Pending' : 'Paid'}
                         </Text>
@@ -343,14 +403,14 @@ const ManageDeliveries = () => {
                         </Text>
                       </TouchableOpacity>
                       <TouchableOpacity
-                        className='p-2 bg-custom_red-200 rounded-lg shadow-2xl w-44'
+                        className='p-2 bg-custom_blue-200 rounded-lg shadow-2xl w-44'
                         onPress={() => {
                           mapRef.current?.animateToRegion(driverLocation)
                           setViewDetails(false)
                         }}
                       >
                         <Text className='font-sanBold_700  text-custom_white-400 text-center'>
-                          Close
+                          Continue Delivering
                         </Text>
                       </TouchableOpacity>
                     </View>
@@ -367,13 +427,19 @@ const ManageDeliveries = () => {
           backgroundStyle={{ borderRadius: 30, backgroundColor: '#f0f0f0' }}
           onDismiss={() => setIsOpen(false)}
         >
-         <RatingModal delivery_id={data?.delivery_id} sender={data?.sender_id.name} receiver={data?.receiver_id.name} closeModal={handleCloseModal}/>
+          <RatingModal
+            delivery_id={data?.delivery_id}
+            sender={data?.sender_id.name}
+            receiver={data?.receiver_id.name}
+            closeModal={handleCloseModal}
+            order_id={data?.order_id}
+          />
         </BottomSheetModal>
       </BottomSheetModalProvider>
     </GestureHandlerRootView>
   )
 }
-const RatingModal = ({delivery_id, sender, receiver, closeModal})=>{
+const RatingModal = ({delivery_id, sender, receiver, closeModal, order_id})=>{
  const token = useSelector(state=>state.auth.user_data.token)
  const {obtainData, error, isLoading, data} = useFetch()
 
@@ -392,6 +458,7 @@ const ratingDescription = {
      delivery_id,
      rating: ratings,
      comment,
+     order_id
    }, {
     headers:{
       Authorization: `Bearer ${token}`
@@ -413,10 +480,8 @@ const ratingDescription = {
 
  return (
    <View className='w-full h-full flex  items-center  '>
-     <Text className=' font-sanBold_500 text-lg mt-9'>Rate Delivery From</Text>
-     <Text className='mt-5 '>
-       {sender} to {receiver}
-     </Text>
+     <Text className=' font-sanBold_500 text-lg mt-9'>Rate Delivery</Text>
+    
      <Text className='font-sanBold_700 text-custom_blue-200 mt-4'>
      {ratings>0?ratingDescription[`${ratings}`]:'Click to Rate'}
 
@@ -450,7 +515,8 @@ const ratingDescription = {
          })}
      </View>
        <TextInput
-                  className='border  rounded-lg px-2  mx-4 mt-5 bg-custom_white-100'
+       textAlignVertical='top'
+                  className='border pt-2  rounded-lg px-2  mx-2 mt-5 bg-custom_white-100'
                   multiline={true}
                   numberOfLines={5}
                   focusable={true}
@@ -475,7 +541,7 @@ const SingleDetail = ({data, label, typeRender})=>{
   const disp = typeRender===label
   data.extra= true
   const handlePlacePhone= ()=>{
-   console.log(label, 'calling')
+    callNumber(data.phone)
   }
   return (
     <View

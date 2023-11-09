@@ -5,9 +5,10 @@ import { useNavigation } from '@react-navigation/native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StatusBar } from 'react-native'
 import * as Icon from 'react-native-feather'
-
+import { useSelector } from 'react-redux'
 const Profile = () => {
    const navigation = useNavigation()
+   
    const handleBackButton = () => {
      navigation.goBack()
      return true
@@ -26,9 +27,10 @@ const Profile = () => {
        BackHandler.removeEventListener('hardwareBackPress', handleBackButton)
      }
    }, [])
+   const user_data = useSelector((state) => state.auth.user_data)
    const data = {
-    name: 'Daniel Mawalla',
-    ratings: 3,
+    name: user_data?.agent?.name,
+    ratings: 5,
     orders:10
 
    }
@@ -106,14 +108,7 @@ const Profile = () => {
               <Text className='text-sm text-center font-sanBold_700  text-custom_orange-500'>
                 Ratings: {data.ratings}
               </Text>
-              <View className=' mt-2 p-4 py-6 shadow-lg rounded bg-custom_white-500'>
-                <Text className='font-sanBold_700 text-xl text-center text-custom_orange-500'>
-                  {data.orders}
-                </Text>
-                <Text className='font-sanBold_700 text-xs text-center text-custom_white-600'>
-                  Total Orders
-                </Text>
-              </View>
+           
             </View>
           </View>
           <View>

@@ -7,6 +7,7 @@
  import DurationSvg from '../assets/images/acceptDeliveries/duration.svg'
  import DistanceSvg from '../assets/images/acceptDeliveries/distance.svg'
  import { GestureHandlerRootView } from 'react-native-gesture-handler'
+ import * as Location from 'expo-location'
  import {
    BottomSheetModal,
    BottomSheetModalProvider,
@@ -15,7 +16,10 @@
  import useFetch from '../hooks/useFetch'
  import { useDispatch, useSelector } from 'react-redux'
  import { removeOrder } from '../store/orderSlice'
+ import { QueryClient, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+ import {api} from '../api'
  const InstantDetails = ({route}) => {
+  const queryClient =useQueryClient()
   const bottomSheetModalRef = useRef(null)
   const [isOpen, setIsOpen] = useState(false)
   const snapPoints = useMemo(() => ['90%', '90%'], [])
@@ -26,33 +30,60 @@
   }
  const {order} = route.params
  const [data, setData] = useState(order)
- const {obtainData, data:requestData, isLoading, error} = useFetch()
+
  const token= useSelector(state=>state.auth.user_data.token)
- const handlePlaceOrder =()=>{
-  obtainData(`/agent/place_order/${data.order_id}`,'get',{}, {
-    headers:{
-      Authorization: `Bearer ${token}`
-    }
-
-  })
-
-
- }
  const dispatch = useDispatch()
- useEffect(
-  ()=>{
-    if(requestData){
-      print(requestData)
-      dispatch(removeOrder({type:'REMOVE_INSTANT', data:{order_id:data.order_id}}))
-      navigation.navigate('DeliveryConfirmed')
+
+ const obtainDriverLocation = async () => {
+     // get driver location
+     // return driver location
+
+     let { status } = await Location.requestForegroundPermissionsAsync()
+     if (status !== 'granted') {
+       Alert.alert('Location permission is required to use this feature')
+       return
+     }
+     let location = await Location.getCurrentPositionAsync({})
+     return {
+       latitude: location.coords.latitude,
+       longitude: location.coords.longitude,
+       heading:location.coords.heading,
+       latitudeDelta:0.003,
+       longitudeDelta:0.003
+     }
+   }
+ const submitAcceptDelivery = async () => {
+  const location = await obtainDriverLocation()
+  const response = await api.post(
+    `/agent/place_order/${data.order_id}`,{
+      location
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     }
-    if(error){
-      console.log(error)
-    }
-  }
-  ,[data, error, isLoading]
-  
- )
+
+  )
+  return response.data
+ }
+
+
+ // using react query
+ const { mutate, isLoading } = useMutation({
+   mutationFn: submitAcceptDelivery,
+   onSuccess: (dt) => {
+     dispatch(
+       removeOrder({
+         type: 'REMOVE_INSTANT',
+         data: { order_id: data.order_id },
+       })
+     )
+     queryClient.invalidateQueries({ queryKey: ['pendingOrders'] })
+     
+     navigation.navigate('DeliveryConfirmed')
+   },
+ })
 
 
    return (
@@ -237,7 +268,7 @@
                  className='text-custom_white-400 font-sanBold_500'
                  >View Map</Text>
                </TouchableOpacity>
-               <TouchableOpacity className='p-2 shadow-lg rounded  bg-custom_blue-200' onPress={handlePlaceOrder}>
+               <TouchableOpacity className='p-2 shadow-lg rounded  bg-custom_blue-200' onPress={mutate}>
                {isLoading? <ActivityIndicator color={'#fff'}/>:
                  <Text className=' text-custom_white-400 font-sanBold_500'>Start Route</Text>}
                </TouchableOpacity>
